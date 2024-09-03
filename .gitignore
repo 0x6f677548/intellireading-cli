@@ -5,3 +5,4 @@ __pycache__
 .coverage
 dist/*
 app/*
+tests/test_files/output
