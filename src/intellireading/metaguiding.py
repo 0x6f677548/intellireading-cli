@@ -87,18 +87,19 @@ def metaguide_epub(input_stream: BytesIO) -> BytesIO:
             _logger.debug("Processing zip: Getting item files")
             _epub_item_files = _get_epub_item_files_from_zip(input_zip)
 
-            # check if we have " in the epub
+            # check if we have _METAGUIDED_FLAG_FILENAME in the epub
             # if we do, this file has been metaguided already
             if any(f.filename == _METAGUIDED_FLAG_FILENAME for f in _epub_item_files):
-                _logger.warn("Epub already metaguided, skipping")
+                _logger.debug("Epub already metaguided, skipping...")
+                #copy the input stream to the output stream
                 input_stream.seek(0)
-                return input_stream
-
-            processed_item_files = _process_epub_item_files(_epub_item_files)
-            _logger.debug("Processing zip: Writing output zip")
-            _write_item_files_to_zip(processed_item_files, output_zip)
-            # write the metaguided file flag to the zip
-            output_zip.writestr(_METAGUIDED_FLAG_FILENAME, b"")
+                output_stream.write(input_stream.read())
+            else:
+                processed_item_files = _process_epub_item_files(_epub_item_files)
+                _logger.debug("Processing zip: Writing output zip")
+                _write_item_files_to_zip(processed_item_files, output_zip)
+                # write the metaguided file flag to the zip
+                output_zip.writestr(_METAGUIDED_FLAG_FILENAME, b"")
 
     output_stream.seek(0)
     return output_stream
