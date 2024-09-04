@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'Intellireading-cli is a Python library with a set of tools to improve your reading experience'
 readme = "README.md"
 requires-python = ">=3.7"
-license = "MIT"
+license = "GPL-3.0"
 keywords = ["epub", "calibre", "ebook","kindle","kobo","speed-reading", "dyslexia", "adhd"]
 authors = [
   { name = "0x6f677546 (Hugo Batista)"},
@@ -16,7 +16,7 @@ authors = [
 classifiers = [
   "Operating System :: OS Independent",
   "Topic :: Software Development",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
   "Intended Audience :: Developers",
