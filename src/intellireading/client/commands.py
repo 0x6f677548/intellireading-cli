@@ -1,7 +1,7 @@
 import click
 import logging
 from sys import exit
-from intellireading.metaguiding import metaguide_epub, metaguide_dir, metaguide_xhtml
+from intellireading.client.metaguiding import metaguide_epub, metaguide_dir, metaguide_xhtml
 from typing import Callable, Any
 from io import BytesIO
 

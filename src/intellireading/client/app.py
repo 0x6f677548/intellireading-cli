@@ -1,5 +1,5 @@
 import click
-from intellireading.commands import (
+from intellireading.client.commands import (
     metaguide_epub_cmd,
     metaguide_xhtml_cmd,
     metaguide_dir_cmd,

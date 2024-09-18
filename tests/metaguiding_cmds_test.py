@@ -1,6 +1,6 @@
 from click.testing import CliRunner
-from intellireading.commands import metaguide_epub_cmd, metaguide_xhtml_cmd, metaguide_dir_cmd
-from intellireading.metaguiding import _METAGUIDED_FLAG_FILENAME
+from intellireading.client.commands import metaguide_epub_cmd, metaguide_xhtml_cmd, metaguide_dir_cmd
+from intellireading.client.metaguiding import _METAGUIDED_FLAG_FILENAME
 import os
 
 

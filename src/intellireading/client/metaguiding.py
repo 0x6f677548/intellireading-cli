@@ -1,7 +1,7 @@
 import logging
 from io import BytesIO
 import os
-from intellireading.regex import RegExBoldMetaguider
+from intellireading.client.regex import RegExBoldMetaguider
 import zipfile
 from typing import Generator
 

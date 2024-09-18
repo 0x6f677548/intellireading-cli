@@ -16,10 +16,16 @@ authors = [
 classifiers = [
   "Operating System :: OS Independent",
   "Topic :: Software Development",
+  "Topic :: Text Processing :: Markup :: XML",
+  "Topic :: Education :: Computer Aided Instruction (CAI)",
+  "Topic :: Utilities",
   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
   "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
@@ -36,7 +42,7 @@ dependencies = [
 ]
 
 [project.scripts]
-intellireading = "intellireading:entrypoint"
+intellireading = "intellireading.client:entrypoint"
 
 [project.urls]
 Documentation = "https://github.com/0x6f677548/intellireading-cli#readme"
@@ -44,7 +50,7 @@ Issues = "https://github.com/0x6f677548/intellireading-cli/issues"
 Source = "https://github.com/0x6f677548/intellireading-cli"
 
 [tool.hatch.version]
-path = "src/intellireading/__about__.py"
+path = "src/intellireading/client/__about__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/intellireading"]
