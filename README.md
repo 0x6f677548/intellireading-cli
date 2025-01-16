@@ -1,4 +1,5 @@
-# Intellireading standalone tool and library
+![Intellireading.com](https://raw.githubusercontent.com/0x6f677548/intellireading-www/main/src/img/intellireading.png)
+# Standalone tool and library
 
 [![PyPI - Version](https://img.shields.io/pypi/v/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
