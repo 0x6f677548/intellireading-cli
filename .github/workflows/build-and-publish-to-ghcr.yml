@@ -1,5 +1,5 @@
 ---
-name: Release->Build and Publish to GHRC
+name: Release->Build and Publish to GHCR
 # yamllint disable rule:line-length
 
 on:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Release->Build and Publish to GHRC (
+run-name: ${{ github.ref_name }} -> Release->Build and Publish to GHCR (
   ${{ github.run_attempt }}
   )
 
@@ -22,7 +22,7 @@ env:
 jobs:
     
   build_and_publish:
-    name: Build artifacts and publish to ghrc
+    name: Build artifacts and publish to ghcr
     runs-on: ubuntu-latest
     permissions:
       contents: write
