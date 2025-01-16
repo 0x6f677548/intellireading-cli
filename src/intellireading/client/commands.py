@@ -1,6 +1,6 @@
 import click
 import logging
-from sys import exit
+import sys
 from intellireading.client.metaguiding import metaguide_epub, metaguide_dir, metaguide_xhtml
 from typing import Callable, Any
 from io import BytesIO
@@ -55,7 +55,7 @@ def _exit_with_exception(exception: Exception, exit_code: int = 1, fg: str = "re
             fg=fg,
         )
     finally:
-        exit(exit_code)
+        sys.exit(exit_code)
 
 
 def _get_from_ctx_if_none(

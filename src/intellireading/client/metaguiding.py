@@ -17,7 +17,7 @@ class _EpubItemFile:
     def __init__(self, filename: str | None = None, content: bytes = b"") -> None:
         self.filename = filename
         self.content = content
-        _extension = self.filename and os.path.splitext(self.filename)[-1].upper() or None
+        _extension = (self.filename and os.path.splitext(self.filename)[-1].upper()) or None
 
         # some epub have files with html extension but they are xml files
         self.is_xhtml_document = _extension in (".HTM", ".HTML", ".XHTML")
@@ -28,7 +28,7 @@ class _EpubItemFile:
 
     def metaguide(self, metaguider: RegExBoldMetaguider):
         if self.metaguided:
-            self._logger.warn("File %s already metaguided, skipping", self.filename)
+            self._logger.warning("File %s already metaguided, skipping", self.filename)
         elif self.is_xhtml_document:
             self._logger.debug("Process (begin): %s", self.filename)
             self.content = metaguider.metaguide_xhtml_document(self.content)
@@ -91,7 +91,7 @@ def metaguide_epub(input_stream: BytesIO) -> BytesIO:
             # if we do, this file has been metaguided already
             if any(f.filename == _METAGUIDED_FLAG_FILENAME for f in _epub_item_files):
                 _logger.debug("Epub already metaguided, skipping...")
-                #copy the input stream to the output stream
+                # copy the input stream to the output stream
                 input_stream.seek(0)
                 output_stream.write(input_stream.read())
             else:
@@ -160,7 +160,7 @@ def metaguide_dir(input_dir: str, output_dir: str) -> None:
 
         # verify if the output file already exists
         if os.path.isfile(output_filename):
-            _logger.warn("Skipping %s because %s already exists", input_filename, output_filename)
+            _logger.warning("Skipping %s because %s already exists", input_filename, output_filename)
             files_skipped += 1
             continue
 
