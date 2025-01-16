@@ -87,7 +87,7 @@ dependencies = [
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --ignore-missing-imports --install-types --non-interactive {args:src/intellireading tests}"
 style = [
-  "ruff {args:.}",
+  "ruff check {args:.}",
   "black --check --diff {args:.}",
 ]
 fmt = [
