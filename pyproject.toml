@@ -7,7 +7,7 @@ name = "intellireading-cli"
 dynamic = ["version"]
 description = 'Intellireading-cli is a Python library with a set of tools to improve your reading experience'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.13"
 license = "GPL-3.0"
 keywords = ["epub", "calibre", "ebook","kindle","kobo","speed-reading", "dyslexia", "adhd"]
 authors = [
@@ -28,11 +28,7 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -79,7 +75,7 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+python = ["3.13"]
 
 [tool.hatch.envs.lint]
 detached = true
