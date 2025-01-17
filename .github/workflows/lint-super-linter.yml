@@ -1,5 +1,5 @@
 ---
-name: Lint-> super-linter (only event codebase)
+name: super_linter
 
 on:
   release:
@@ -7,17 +7,23 @@ on:
   pull_request:
     branches: [master, main]
 
+  workflow_dispatch:
+  
+  schedule:
+    # run on mondays and thursdays at 00:00 UTC
+    - cron: '0 0 * * 1'
+    
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Super-linter (only event codebase) (
+run-name: ${{ github.ref_name }} -> super_linter (
   ${{ github.run_attempt }}
   )
 
 permissions: read-all
 
 jobs:
-  build:
+  super_linter:
 
-    name: Lint code base part of the event
+    name: super_linter
     runs-on: ubuntu-latest
 
     ############################################

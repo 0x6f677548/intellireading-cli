@@ -1,5 +1,5 @@
 ---
-name: Release->Build and Publish to PyPi
+name: build_and_pub_to_pypi
 # yamllint disable rule:line-length
 
 on:
@@ -8,32 +8,25 @@ on:
   workflow_dispatch:
 
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Release->Build and Publish to Pypi (
+run-name: ${{ github.ref_name }} -> build_and_pub_to_pypi (
   ${{ github.run_attempt }}
   )
   
             
 jobs:
 
-  output_debug_info:
-    name: Output debug info
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: Echo current date and time
-      id: datetime
-      run: |
-        echo "datetime: $(date '+%Y-%m-%d %H:%M:%S')"
-
-    
-  build_and_publish:
-    name: Build artifacts and publish to pyPi
+  build_and_pub_to_pypi:
+    name: build_and_pub_to_pypi
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: write
     steps:
 
+    - name: Echo current date and time
+      id: datetime
+      run: |
+        echo "datetime: $(date '+%Y-%m-%d %H:%M:%S')"
 
 
     - name: Checkout

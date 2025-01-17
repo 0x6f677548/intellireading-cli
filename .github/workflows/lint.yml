@@ -1,5 +1,5 @@
 ---
-name: Lint
+name: lint
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Lint (
+run-name: ${{ github.ref_name }} -> lint (
   ${{ github.run_attempt }}
   )
 
@@ -21,7 +21,7 @@ run-name: ${{ github.ref_name }} -> Lint (
 jobs:
   lint:
 
-    name: Lints the code using specified linters
+    name: lint
     runs-on: ubuntu-latest
 
     steps:
@@ -49,10 +49,13 @@ jobs:
       - name: Lint with black
         run: |
           black --check src
-      # ignore E501 (line too long) for now
+      # ignore E501 (line too long)
+      # Ignore I001 Import block is un-sorted or un-formatted
+      # Ignore B008 function call in argument defaults
       - name: Lint with ruff
         run: |
-          ruff check src --ignore=E501,I001
+          ruff check src --ignore=E501,I001,B008
+
       - name: Lint with mypy
         run: |
           mypy src --ignore-missing-imports

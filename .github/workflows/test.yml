@@ -1,5 +1,5 @@
 ---
-name: Test
+name: test
 
 on:
   push:
@@ -13,15 +13,15 @@ on:
   workflow_dispatch:
 
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Test (
+run-name: ${{ github.ref_name }} -> test (
   ${{ github.run_attempt }}
   )
 
 
 jobs:
-  lint:
+  test:
 
-    name: Runs unit tests
+    name: test
     runs-on: ubuntu-latest
 
     steps:

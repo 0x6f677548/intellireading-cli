@@ -1,19 +1,19 @@
 ---
-name: Debug->dump env and context
+name: debug_context
 #yamllint disable
 
 on:
   workflow_dispatch:
 
-run-name: ${{ github.ref_name }} -> dump env and context (
+run-name: ${{ github.ref_name }} -> debug_context (
   ${{ github.run_attempt }}
   )
     
 jobs:
 
-  debug:
+  debug_context:
     
-    name: Debug
+    name: debug_context
     runs-on: ubuntu-latest
     steps:
       - name: Echo current date and time

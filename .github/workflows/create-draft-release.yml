@@ -1,12 +1,12 @@
 ---
-name: Create->Draft Release
+name: create_draft_release
 # yamllint disable rule:line-length
 
 on:
   workflow_dispatch:
 
 # set the run-name 
-run-name: ${{ github.ref_name }} -> Create->Draft Release (
+run-name: ${{ github.ref_name }} -> create_draft_release (
   ${{ github.run_attempt }}
   )
     
@@ -14,7 +14,7 @@ run-name: ${{ github.ref_name }} -> Create->Draft Release (
 jobs:
     
   create_draft_release:
-    name: Creates a draft release with version number as title
+    name: create_draft_release
     runs-on: ubuntu-latest
     permissions:
       id-token: write

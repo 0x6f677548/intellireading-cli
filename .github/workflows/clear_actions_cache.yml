@@ -1,5 +1,5 @@
 ---
-name: Maintenance-> Clear github actions cache
+name: clear_actions_cache
 
 on:
   workflow_dispatch:
@@ -8,7 +8,8 @@ permissions:
   actions: write
 
 jobs:
-  clear-cache:
+  clear_actions_cache:
+    name: clear_actions_cache
     runs-on: ubuntu-latest
     steps:
       - name: Echo current date and time
