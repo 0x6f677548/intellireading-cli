@@ -79,13 +79,13 @@ def _get_from_ctx_if_none(
 
 @click.command(
     "metaguide-epub",
-    help="Applies metaguiding to the provided epub file",
+    help="Applies metaguiding to the provided epub/kepub file",
 )
 @click.pass_context
 @_input_file_option
 @_output_file_option
 def metaguide_epub_cmd(ctx: click.Context, input_file: str, output_file: str):
-    """Applies metaguiding to the provided epub file"""
+    """Applies metaguiding to the provided epub/kepub file"""
 
     try:
         ctx.ensure_object(dict)
