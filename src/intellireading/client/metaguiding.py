@@ -133,7 +133,7 @@ def metaguide_dir(input_dir: str, output_dir: str) -> None:
             input_filename = os.path.join(directory, filename)
 
             extension = os.path.splitext(input_filename)[-1].upper()
-            if os.path.isfile(input_filename) and (extension in [".EPUB", ".XHTML", ".HTML", ".HTM"]):
+            if os.path.isfile(input_filename) and (extension in [".EPUB", "*.KEPUB", ".XHTML", ".HTML", ".HTM"]):
                 yield input_filename
             elif os.path.isdir(input_filename) and recursive:
                 yield from _get_files(input_filename, recursive)
@@ -167,7 +167,7 @@ def metaguide_dir(input_dir: str, output_dir: str) -> None:
         try:
             with open(input_filename, "rb") as input_reader:
                 input_file_stream = BytesIO(input_reader.read())
-                if input_filename.upper().endswith(".EPUB"):
+                if input_filename.upper().endswith(".EPUB") or input_filename.upper().endswith(".KEPUB"):
                     output_file_stream = metaguide_epub(input_file_stream)
                 else:
                     output_file_stream = metaguide_xhtml(input_file_stream)
