@@ -3,8 +3,10 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
-[![GitHub - Lint](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml)
-[![GitHub - Test](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml)
+[![Deploy to ghcr.io](https://github.com/0x6f677548/intellireading-backend/actions/workflows/build-and-publish-to-ghcr.yml/badge.svg)](https://github.com/0x6f677548/intellireading-backend/actions/workflows/build-and-publish-to-ghcr.yml)
+[![Lint](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml)
+[![Test](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml)
+
 
 Intellireading is a CLI tool with commands to accelerate your reading experience. It can also be used as a python library.
 Currently, it supports metaguiding an EPUB, KEPUB, XHTML, or HTML file (more features coming):
