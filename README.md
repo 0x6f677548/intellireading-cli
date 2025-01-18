@@ -7,7 +7,21 @@
 [![GitHub - Test](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml)
 
 Intellireading is a CLI tool with commands to accelerate your reading experience. It can also be used as a python library.
-Currently, it supports metaguiding an EPUB, XHTML, or HTML file. More features will be added in the future.
+Currently, it supports metaguiding an EPUB, KEPUB, XHTML, or HTML file (more features coming):
+```console
+> intellireading metaguide-epub --input_file mybook.epub --output_file mybook_metaguided.epub
+```
+Example of a text converted to a metaguided text:
+![Intellireading.com](https://raw.githubusercontent.com/0x6f677548/intellireading-www/main/src/img/sample.png) 
+
+
+This repo is part of the [Intellireading](https://intellireading.com/) project, which aims to help people with dyslexia, ADHD, or anyone who wants to improve their reading focus and speed. 
+
+## Other Intellireading Code Repositories
+- [Intellireading website](https://www.github.com/0x6f677548/intellireading-www), which allows anyone to convert an Epub to the metaguided version.
+- [Backend Servers](https://www.github.com/0x6f677548/intellireading-backend), that support the Intellireading website.
+- [CLI Tool](https://www.github.com/0x6f677548/intellireading-cli). A standalone tool and library that can be used to metaguide epub files.
+- [Calibre Plugins](https://www.github.com/0x6f677548/intellireading-calibre-plugins). A set of plugins that can be used to metaguide epub files using Calibre.
 
 
 ## What is Epub Metaguiding?
@@ -16,7 +30,6 @@ Currently, it supports metaguiding an EPUB, XHTML, or HTML file. More features w
 **Howe**ver, **unl**ike **a** **fing**er, **th**e **vis**ual **gui**de **i**s **no**t **distra**cting, **an**d **i**t **ca**n **b**e **us**ed **t**o **gui**de **yo**ur **ey**es **alo**ng **mult**iple **lin**es **o**f **te**xt **a**t **onc**e. **Th**is **all**ows **yo**u **t**o **re**ad **fast**er, **an**d **wi**th **le**ss **effo**rt.
 
 **Metagu**iding **i**s **partic**ulary **use**ful **fo**r **peo**ple **wi**th **dysl**exia **o**r **ADH**D, **bu**t **i**t **ca**n **b**e **us**ed **b**y **any**one **wh**o **wan**ts **t**o **impr**ove **the**ir **read**ing **foc**us **an**d **spe**ed. **Fo**r **mo**re **inform**ation, **vis**it **th**e [**Intelli**reading **webs**ite.](https://intellireading.com/)
-
 
 ## Features
 
