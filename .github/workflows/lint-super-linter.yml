@@ -24,11 +24,9 @@ jobs:
     name: super_linter
     runs-on: ubuntu-latest
 
-    ############################################
-    # Grant status permission for MULTI_STATUS #
-    ############################################
     permissions:
       contents: read
+      packages: read      
       statuses: write
 
     steps:
