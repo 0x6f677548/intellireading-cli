@@ -9,9 +9,6 @@ on:
 
   workflow_dispatch:
   
-  schedule:
-    # run on mondays and thursdays at 00:00 UTC
-    - cron: '0 0 * * 1'
     
 # set the run-name 
 run-name: ${{ github.ref_name }} -> super_linter (
