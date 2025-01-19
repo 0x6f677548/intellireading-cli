@@ -8,7 +8,10 @@ on:
 run-name: ${{ github.ref_name }} -> debug_context (
   ${{ github.run_attempt }}
   )
-    
+
+permissions:
+  contents: read
+
 jobs:
 
   debug_context:

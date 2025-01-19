@@ -17,6 +17,9 @@ run-name: ${{ github.ref_name }} -> lint (
   ${{ github.run_attempt }}
   )
 
+permissions:
+  contents: read
+
 
 jobs:
   lint:

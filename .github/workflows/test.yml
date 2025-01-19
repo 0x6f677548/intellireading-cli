@@ -17,6 +17,8 @@ run-name: ${{ github.ref_name }} -> test (
   ${{ github.run_attempt }}
   )
 
+permissions:
+  contents: read
 
 jobs:
   test:
