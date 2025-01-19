@@ -58,11 +58,11 @@ jobs:
     
     - name: Create release branch
       run: |
-        git checkout -b "release/${{ steps.get_version.outputs.version }}"
-        git push origin "release/${{ steps.get_version.outputs.version }}"
+        git checkout -b "release/v${{ steps.get_version.outputs.version }}"
+        git push origin "release/v${{ steps.get_version.outputs.version }}"
 
     - name: Create DRAFT release through github cli and upload assets
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |        
-        gh release create ${{ steps.get_version.outputs.version }} --title ${{ steps.get_version.outputs.version }} --generate-notes --draft
+        gh release create v${{ steps.get_version.outputs.version }} --title v${{ steps.get_version.outputs.version }} --generate-notes --draft
