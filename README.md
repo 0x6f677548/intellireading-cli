@@ -3,7 +3,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
-[![Deploy to ghcr.io](https://github.com/0x6f677548/intellireading-backend/actions/workflows/build-and-publish-to-ghcr.yml/badge.svg)](https://github.com/0x6f677548/intellireading-backend/actions/workflows/build-and-publish-to-ghcr.yml)
+[![Deploy to ghcr.io](https://github.com/0x6f677548/intellireading-cli/actions/workflows/build-and-publish-to-ghcr.yml/badge.svg)](https://github.com/0x6f677548/intellireading-backend/actions/workflows/build-and-publish-to-ghcr.yml)
 [![Lint](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml)
 [![Test](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml)
 
