@@ -1,5 +1,9 @@
 FROM python:3-slim
 
+# Links Docker image with repository
+LABEL org.opencontainers.image.source=https://github.com/0x6f677548/intellireading-cli
+
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
