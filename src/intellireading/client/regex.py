@@ -9,6 +9,7 @@ class RegExBoldMetaguider:
     _bolded_text_block_regex = re.compile(r"<b>\b\w{1}\b</b>|<b>\b\w+\b</b>(?:\b\w+\b)")
     _word_pattern_regex = re.compile(r"\b\w+\b", re.UNICODE)
     _entity_ref_regex = re.compile(r"(&[#a-zA-Z][a-zA-Z0-9]*;)")
+    _bolded_word_regex = re.compile(r"<b>(.*?)</b>")
     _logger = logging.getLogger(__name__)
 
     def __init__(self, fallback_encoding: str = "utf-8") -> None:
@@ -30,9 +31,12 @@ class RegExBoldMetaguider:
         if not word.strip():
             return word
 
+        # short-circuit if the word is not bolded
+        if "<b>" not in word:
+            return word
+
         # remove the <b></b> tags
-        pattern = re.compile(r"<b>(.*?)</b>")
-        return pattern.sub(r"\1", word)
+        return self._bolded_word_regex.sub(r"\1", word)
 
     def _bold_node_text_part(self, part: str) -> str:
         # is this part an entity reference?
