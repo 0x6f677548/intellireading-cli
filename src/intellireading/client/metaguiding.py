@@ -26,14 +26,14 @@ class _EpubItemFile:
     def __str__(self) -> str:
         return f"{self.filename} ({len(self.content)} bytes)"
 
-    def metaguide(self, metaguider: RegExBoldMetaguider):
-        if self.metaguided:
+    def metaguide(self, metaguider: RegExBoldMetaguider, *, remove_metaguiding: bool = False):
+        if not remove_metaguiding and self.metaguided:
             self._logger.warning("File %s already metaguided, skipping", self.filename)
         elif self.is_xhtml_document:
-            self._logger.debug("Process (begin): %s", self.filename)
-            self.content = metaguider.metaguide_xhtml_document(self.content)
+            self._logger.debug("Metaguide (begin): %s", self.filename)
+            self.content = metaguider.metaguide_xhtml_document(self.content, remove_metaguiding=remove_metaguiding)
             self.metaguided = True
-            self._logger.debug("Process (end): %s", self.filename)
+            self._logger.debug("Metaguide (end): %s", self.filename)
         else:
             self._logger.debug("Skipping file %s", self.filename)
 
@@ -47,10 +47,12 @@ def _get_epub_item_files_from_zip(input_zip: zipfile.ZipFile) -> list:
     return _epub_item_files
 
 
-def _process_epub_item_files(epub_item_files: list[_EpubItemFile]) -> Generator[_EpubItemFile, None, None]:
+def _process_epub_item_files(
+    epub_item_files: list[_EpubItemFile], *, remove_metaguiding: bool = False
+) -> Generator[_EpubItemFile, None, None]:
     for _epub_item_file in epub_item_files:
-        _logger.debug(f"Processing file '{_epub_item_file.filename}'")
-        _epub_item_file.metaguide(_metaguider)
+        _logger.debug(f"Processing file '{_epub_item_file.filename}' remove_metaguiding={remove_metaguiding}")
+        _epub_item_file.metaguide(_metaguider, remove_metaguiding=remove_metaguiding)
         yield _epub_item_file
 
 
@@ -72,58 +74,80 @@ def _write_item_files_to_zip(epub_item_files, output_zip):
         _write_compressed_file(output_zip, _epub_item_file)
 
 
-def metaguide_epub(input_stream: BytesIO) -> BytesIO:
+def metaguide_epub(input_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
     """Metaguide an epub file
     input_file_stream: BytesIO
         The input epub file stream
+    remove_metaguiding: bool
+        If True, removes metaguiding from the epub file
     return: BytesIO
         The metaguided epub file stream
     """
     output_stream = BytesIO()
 
-    _logger.debug("Metaguiding epub: Getting item files")
+    if remove_metaguiding:
+        _logger.debug("Removing metaguiding from epub")
+    else:
+        _logger.debug("Metaguiding epub")
+
+    _logger.debug("Getting item files")
     with zipfile.ZipFile(input_stream, "r", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as input_zip:
         with zipfile.ZipFile(output_stream, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as output_zip:
             _logger.debug("Processing zip: Getting item files")
             _epub_item_files = _get_epub_item_files_from_zip(input_zip)
 
-            # check if we have _METAGUIDED_FLAG_FILENAME in the epub
+            # check if we are metaguiding and have _METAGUIDED_FLAG_FILENAME in the epub
             # if we do, this file has been metaguided already
-            if any(f.filename == _METAGUIDED_FLAG_FILENAME for f in _epub_item_files):
+            if not remove_metaguiding and any(f.filename == _METAGUIDED_FLAG_FILENAME for f in _epub_item_files):
                 _logger.debug("Epub already metaguided, skipping...")
                 # copy the input stream to the output stream
                 input_stream.seek(0)
                 output_stream.write(input_stream.read())
             else:
-                processed_item_files = _process_epub_item_files(_epub_item_files)
+                processed_item_files = list(
+                    _process_epub_item_files(_epub_item_files, remove_metaguiding=remove_metaguiding)
+                )
+
+                if remove_metaguiding:
+                    # remove the metaguided flag file
+                    filtered_files = filter(lambda f: f.filename != _METAGUIDED_FLAG_FILENAME, processed_item_files)
+                    processed_item_files = list(filtered_files)
+                else:
+                    _logger.debug("Processing zip: Adding metaguided flag file")
+                    processed_item_files.append(_EpubItemFile(_METAGUIDED_FLAG_FILENAME))
+
                 _logger.debug("Processing zip: Writing output zip")
                 _write_item_files_to_zip(processed_item_files, output_zip)
-                # write the metaguided file flag to the zip
-                output_zip.writestr(_METAGUIDED_FLAG_FILENAME, b"")
 
     output_stream.seek(0)
     return output_stream
 
 
-def metaguide_xhtml(input_file_stream: BytesIO) -> BytesIO:
+def metaguide_xhtml(input_file_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
     """Metaguide an xhtml file
     input_file_stream: BytesIO
         The input xhtml file stream
+    remove_metaguiding: bool
+        If True, removes metaguiding from the xhtml file
     return: BytesIO
         The metaguided xhtml file stream
     """
     output_file_stream = BytesIO()
-    output_file_stream.write(_metaguider.metaguide_xhtml_document(input_file_stream.read()))
+    output_file_stream.write(
+        _metaguider.metaguide_xhtml_document(input_file_stream.read(), remove_metaguiding=remove_metaguiding)
+    )
     output_file_stream.seek(0)
     return output_file_stream
 
 
-def metaguide_dir(input_dir: str, output_dir: str) -> None:
+def metaguide_dir(input_dir: str, output_dir: str, *, remove_metaguiding: bool = False):
     """Metaguides all epubs and xhtml found in a directory (recursively)
     input_dir: str
         The input epub/xhtml directory
     output_dir: str
         The output epub/xhtml directory
+    remove_metaguiding: bool
+        If True, removes metaguiding from the files
     """
 
     # get a list of all the files in the directory, and the child directories if recursive
@@ -168,9 +192,9 @@ def metaguide_dir(input_dir: str, output_dir: str) -> None:
             with open(input_filename, "rb") as input_reader:
                 input_file_stream = BytesIO(input_reader.read())
                 if input_filename.upper().endswith(".EPUB") or input_filename.upper().endswith(".KEPUB"):
-                    output_file_stream = metaguide_epub(input_file_stream)
+                    output_file_stream = metaguide_epub(input_file_stream, remove_metaguiding=remove_metaguiding)
                 else:
-                    output_file_stream = metaguide_xhtml(input_file_stream)
+                    output_file_stream = metaguide_xhtml(input_file_stream, remove_metaguiding=remove_metaguiding)
                 with open(output_filename, "wb") as output_writer:
                     output_writer.write(output_file_stream.read())
             files_processed += 1

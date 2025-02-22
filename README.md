@@ -117,3 +117,29 @@ To metaguide all files in a directory, use the `metaguide-dir` command. The comm
 > intellireading metaguide-dir --input_dir mydir --output_dir mydir_metaguided
 ```
 
+## Experimental Features
+Some features are still experimental and may not work as expected. Use them with caution.
+
+### Remove metaguiding
+The remove metaguiding feature allows you to remove metaguiding from previous metaguided files. This implementation is still experimental and may not work as expected, since it is not possible to recover the original text. The current implementation tries to remove the metaguiding by removing the bold tags from the text, but that may imply in some original text format loss.
+
+#### Remove metaguiding from an EPUB file
+To remove metaguiding from an EPUB file, use the --remove_metaguiding flag. The command requires the path to the EPUB file and the output file. The output file will be an epub file without metaguiding. 
+
+```console
+> intellireading metaguide-epub --remove_metaguiding --input_file mybook_metaguided.epub --output_file mybook.epub
+```
+
+#### Remove metaguiding from a XHTML file
+To remove metaguiding from a XHTML file, use the --remove_metaguiding flag. The command requires the path to the XHTML file and the output file. The output file will be an xhtml file without metaguiding. 
+
+```console
+> intellireading metaguide-xhtml --remove_metaguiding --input_file mybook_metaguided.xhtml --output_file mybook.xhtml
+```
+
+#### Remove metaguiding from all files in a directory
+To remove metaguiding from all files in a directory, use the --remove_metaguiding flag. The command requires the path to the directory and the output directory. The output directory will contain all files without metaguiding, including epub, xhtml and html files. 
+
+```console
+> intellireading metaguide-dir --remove_metaguiding --input_dir mydir_metaguided --output_dir mydir
+```
