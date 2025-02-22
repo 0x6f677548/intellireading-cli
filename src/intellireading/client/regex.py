@@ -6,6 +6,7 @@ import logging
 class RegExBoldMetaguider:
     _body_regex = re.compile(r"<body[^>]*>(.*)</body>", re.DOTALL)
     _text_block_regex = re.compile(r"(?<!<b)>[^\S]*[^\s<][^<]*[^\S\n]*<")
+    _bolded_text_block_regex = re.compile(r"<b>\b\w{1}\b</b>|<b>\b\w+\b</b>(?:\b\w+\b)")
     _word_pattern_regex = re.compile(r"\b\w+\b", re.UNICODE)
     _entity_ref_regex = re.compile(r"(&[#a-zA-Z][a-zA-Z0-9]*;)")
     _logger = logging.getLogger(__name__)
@@ -24,15 +25,36 @@ class RegExBoldMetaguider:
         midpoint = 1 if _length in (1, 3) else math.ceil(len(word) / 2)
         return f"<b>{word[:midpoint]}</b>{word[midpoint:]}"  # Bold the first half of the word
 
+    def _unbold_word(self, word: str) -> str:
+        # if the word is an empty string, whitespace or new line, return it
+        if not word.strip():
+            return word
+
+        # remove the <b></b> tags
+        pattern = re.compile(r"<b>(.*?)</b>")
+        return pattern.sub(r"\1", word)
+
     def _bold_node_text_part(self, part: str) -> str:
         # is this part an entity reference?
         if self._entity_ref_regex.match(part):
             return part
         return self._word_pattern_regex.sub(lambda m: self._bold_word(m.group()), part)
 
+    def _unbold_node_text_part(self, part: str) -> str:
+        # skip if it's an entity reference
+        if self._entity_ref_regex.match(part):
+            self._logger.debug("Skipping entity reference: %s", part)
+            return part
+        # self._logger.debug("Unbold text node part: %s", part)
+        # remove bold tags on all words found
+        result = self._unbold_word(part)
+        # self._logger.debug("Unbolded text node part: %s", result)
+        return result
+
     def _bold_text_node(self, node: str) -> str:
         # this is the function that is called for each text node
         node_text = node[1:-1]
+        self._logger.debug("Bold text node: %s", node_text)
 
         # split the node_text into parts based on the entity references
         node_text_parts = self._entity_ref_regex.split(node_text)
@@ -43,18 +65,26 @@ class RegExBoldMetaguider:
             return ">" + new_node_text + "<"
         return node
 
-    def _bold_document(self, html: str) -> str:
+    def _bold_document(self, html: str, *, remove_metaguiding: bool = False) -> str:
         # get the body. If there is no body, return the original html
         match = self._body_regex.search(html)
-        if match:
-            body = match.group(1)
-        else:
+        if not match:
             return html
 
-        # find all text nodes in the body and trigger the bolding of the words
-        body = self._text_block_regex.sub(lambda m: self._bold_text_node(m.group()), body)
+        body = match.group(1)
+        if not remove_metaguiding:
+            # find all text nodes in the body and trigger the bolding of the words
+            body = self._text_block_regex.sub(
+                lambda m: self._bold_text_node(m.group()),
+                body,
+            )
+        else:
+            body = self._bolded_text_block_regex.sub(lambda m: self._unbold_node_text_part(m.group()), body)
+
+        self._logger.debug("Bolded body: %s", body)
 
         html = html.replace(match.group(1), body)
+        # self._logger.debug("Bolded HTML: %s", html)
         return html
 
     def _get_encoding_using_lxml(self, xhtml_document: bytes) -> str | None:
@@ -117,10 +147,10 @@ class RegExBoldMetaguider:
 
         return _encoding or self._fallback_encoding
 
-    def metaguide_xhtml_document(self, xhtml_document: bytes) -> bytes:
+    def metaguide_xhtml_document(self, xhtml_document: bytes, *, remove_metaguiding: bool = False) -> bytes:
         # if none of the methods to detect the encoding work, use utf-8
         _encoding = self._get_encoding(xhtml_document) or "utf-8"
 
         _html = xhtml_document.decode(_encoding)
-        _bolded_html = self._bold_document(_html)
+        _bolded_html = self._bold_document(_html, remove_metaguiding=remove_metaguiding)
         return _bolded_html.encode(_encoding)
