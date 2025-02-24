@@ -22,8 +22,8 @@ class RegExBoldMetaguider:
         if not word.strip():
             return word
 
-        _length = len(word)
-        midpoint = 1 if _length in (1, 3) else math.ceil(len(word) / 2)
+        word_length = len(word)
+        midpoint = 1 if word_length in (1, 3) else math.ceil(word_length / 2)
         return f"<b>{word[:midpoint]}</b>{word[midpoint:]}"  # Bold the first half of the word
 
     def _unbold_word(self, word: str) -> str:
@@ -94,10 +94,10 @@ class RegExBoldMetaguider:
     def _get_encoding_using_lxml(self, xhtml_document: bytes) -> str | None:
         from lxml import etree
 
-        _parser = etree.XMLParser(resolve_entities=False)
-        _doc = etree.fromstring(xhtml_document, parser=_parser).getroottree()  # noqa: S320
-        _docinfo = _doc.docinfo
-        return _docinfo.encoding
+        parser = etree.XMLParser(resolve_entities=False)
+        doc = etree.fromstring(xhtml_document, parser=parser).getroottree()  # noqa: S320
+        docinfo = doc.docinfo
+        return docinfo.encoding
 
     def _get_encoding_using_bom(self, xhtml_document: bytes) -> str | None:
         if xhtml_document.startswith(b"\xef\xbb\xbf"):
@@ -134,27 +134,27 @@ class RegExBoldMetaguider:
             return None
 
     def _get_encoding(self, xhtml_document: bytes) -> str:
-        _encoding = self._get_encoding_using_xml_header(xhtml_document)
+        encoding = self._get_encoding_using_xml_header(xhtml_document)
 
-        if not _encoding:
+        if not encoding:
             self._logger.debug(
                 "Could not detect the encoding of the XHTML document using the XML header. "
                 "Trying to detect the encoding using the BOM."
             )
-            _encoding = self._get_encoding_using_bom(xhtml_document)
+            encoding = self._get_encoding_using_bom(xhtml_document)
 
-        if not _encoding:
+        if not encoding:
             self._logger.debug(
                 "Could not detect the encoding of the XHTML document. Trying to detect the encoding using lxml."
             )
-            _encoding = self._get_encoding_using_lxml(xhtml_document)
+            encoding = self._get_encoding_using_lxml(xhtml_document)
 
-        return _encoding or self._fallback_encoding
+        return encoding or self._fallback_encoding
 
     def metaguide_xhtml_document(self, xhtml_document: bytes, *, remove_metaguiding: bool = False) -> bytes:
         # if none of the methods to detect the encoding work, use utf-8
-        _encoding = self._get_encoding(xhtml_document) or "utf-8"
+        encoding = self._get_encoding(xhtml_document) or "utf-8"
 
-        _html = xhtml_document.decode(_encoding)
-        _bolded_html = self._bold_document(_html, remove_metaguiding=remove_metaguiding)
-        return _bolded_html.encode(_encoding)
+        html = xhtml_document.decode(encoding)
+        bolded_html = self._bold_document(html, remove_metaguiding=remove_metaguiding)
+        return bolded_html.encode(encoding)
