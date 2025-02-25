@@ -35,6 +35,7 @@ classifiers = [
 dependencies = [
   "click>=8.1.7",
   "lxml>=4.9.2",
+  "regex >= 2024.11.6",
 ]
 
 [project.scripts]

@@ -4,7 +4,7 @@ import os
 import zipfile
 from typing import Generator
 import math
-import re
+import regex as re
 
 
 _logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ _XHTML_EXTENSIONS = [".XHTML", ".HTML", ".HTM"]
 
 class RegExBoldMetaguider:
     _body_regex = re.compile(r"<body[^>]*>(.*)</body>", re.DOTALL)
-    _text_block_regex = re.compile(r"(?<!<b)>[^\S]*[^\s<][^<]*[^\S\n]*<")
+    _text_block_regex = re.compile(r"(?<!<b[^>]*)>[^\S]*[^\s<][^<]*[^\S\n]*<")
     _bolded_text_block_regex = re.compile(r"<b>\b\w{1}\b</b>|<b>\b\w+\b</b>(?:\b\w+\b)")
     _word_pattern_regex = re.compile(r"\b\w+\b", re.UNICODE)
     _entity_ref_regex = re.compile(r"(&[#a-zA-Z][a-zA-Z0-9]*;)")
