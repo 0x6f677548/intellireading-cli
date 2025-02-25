@@ -1,9 +1,8 @@
 import click
 import logging
 import sys
-from intellireading.client.metaguiding import metaguide_epub, metaguide_dir, metaguide_xhtml
+from intellireading.client.metaguiding import metaguide_epub_file, metaguide_dir, metaguide_xhtml_file
 from typing import Callable, Any
-from io import BytesIO
 
 _logger = logging.getLogger(__name__)
 
@@ -108,11 +107,8 @@ def metaguide_epub_cmd(ctx: click.Context, input_file: str, output_file: str, *,
         output_file = _get_from_ctx_if_none(ctx, "output_file", output_file, lambda: click.prompt("The output file"))
         click.echo(f"Output file: {output_file}")
 
-        with open(input_file, "rb") as input_reader:
-            input_file_stream = BytesIO(input_reader.read())
-            output_file_stream = metaguide_epub(input_file_stream, remove_metaguiding=remove_metaguiding)
-            with open(output_file, "wb") as output_writer:
-                output_writer.write(output_file_stream.read())
+        metaguide_epub_file(input_file, output_file, remove_metaguiding=remove_metaguiding)
+
         # store the output file in the context for chaining commands
         ctx.obj["output_file"] = output_file
     except Exception as e:
@@ -150,7 +146,7 @@ def metaguide_dir_cmd(ctx: click.Context, input_dir: str, output_dir: str, *, re
 
         # check if we have the same input and output directories
         if input_dir == output_dir:
-            _exit_with_exception(ValueError("Input and output directories are the same. Exiting..."), fg="red")
+            _exit_with_exception(ValueError("Input and output directories cannot be the same. Exiting..."), fg="red")
 
         metaguide_dir(input_dir, output_dir, remove_metaguiding=remove_metaguiding)
     except Exception as e:
@@ -180,11 +176,8 @@ def metaguide_xhtml_cmd(ctx: click.Context, input_file: str, output_file: str, *
         output_file = _get_from_ctx_if_none(ctx, "output_file", output_file, lambda: click.prompt("The output file"))
         click.echo(f"Output file: {output_file}")
 
-        with open(input_file, "rb") as input_reader:
-            input_file_stream = BytesIO(input_reader.read())
-            output_file_stream = metaguide_xhtml(input_file_stream, remove_metaguiding=remove_metaguiding)
-            with open(output_file, "wb") as output_writer:
-                output_writer.write(output_file_stream.read())
+        metaguide_xhtml_file(input_file, output_file, remove_metaguiding=remove_metaguiding)
+
         # store the output file in the context for chaining commands
         ctx.obj["output_file"] = output_file
     except Exception as e:

@@ -1,20 +1,172 @@
 import logging
 from io import BytesIO
 import os
-from intellireading.client.regex import RegExBoldMetaguider
 import zipfile
 from typing import Generator
+import math
+import re
 
 
 _logger = logging.getLogger(__name__)
-_metaguider = RegExBoldMetaguider()
 _METAGUIDED_FLAG_FILENAME = "intellireading.metaguide"
 _EPUB_EXTENSIONS = [".EPUB", ".KEPUB"]
 _XHTML_EXTENSIONS = [".XHTML", ".HTML", ".HTM"]
 
 
+class RegExBoldMetaguider:
+    _body_regex = re.compile(r"<body[^>]*>(.*)</body>", re.DOTALL)
+    _text_block_regex = re.compile(r"(?<!<b)>[^\S]*[^\s<][^<]*[^\S\n]*<")
+    _bolded_text_block_regex = re.compile(r"<b>\b\w{1}\b</b>|<b>\b\w+\b</b>(?:\b\w+\b)")
+    _word_pattern_regex = re.compile(r"\b\w+\b", re.UNICODE)
+    _entity_ref_regex = re.compile(r"(&[#a-zA-Z][a-zA-Z0-9]*;)")
+    _bolded_word_regex = re.compile(r"<b>(.*?)</b>")
+
+    def __init__(self, fallback_encoding: str = "utf-8") -> None:
+        self._fallback_encoding = fallback_encoding
+
+    def _bold_word(self, word: str) -> str:
+        # this is the function that is called for each word
+
+        # if the word is an empty string, whitespace or new line, return it
+        if not word.strip():
+            return word
+
+        word_length = len(word)
+        midpoint = 1 if word_length in (1, 3) else math.ceil(word_length / 2)
+        return f"<b>{word[:midpoint]}</b>{word[midpoint:]}"  # Bold the first half of the word
+
+    def _unbold_word(self, word: str) -> str:
+        # if the word is an empty string, whitespace or new line, return it
+        if not word.strip():
+            return word
+
+        # short-circuit if the word is not bolded
+        if "<b>" not in word:
+            return word
+
+        # remove the <b></b> tags
+        return self._bolded_word_regex.sub(r"\1", word)
+
+    def _bold_node_text_part(self, part: str) -> str:
+        # is this part an entity reference?
+        if self._entity_ref_regex.match(part):
+            return part
+        return self._word_pattern_regex.sub(lambda m: self._bold_word(m.group()), part)
+
+    def _unbold_node_text_part(self, part: str) -> str:
+        # skip if it's an entity reference
+        if self._entity_ref_regex.match(part):
+            _logger.debug(f"Skipping entity reference: {part}")
+            return part
+        # remove bold tags on all words found
+        result = self._unbold_word(part)
+        return result
+
+    def _bold_text_node(self, node: str) -> str:
+        # this is the function that is called for each text node
+        node_text = node[1:-1]
+        _logger.debug(f"Bold text node: {node_text}")
+
+        # split the node_text into parts based on the entity references
+        node_text_parts = self._entity_ref_regex.split(node_text)
+
+        new_node_text = "".join(map(self._bold_node_text_part, node_text_parts))
+
+        if node_text != new_node_text:
+            return ">" + new_node_text + "<"
+        return node
+
+    def _bold_document(self, html: str, *, remove_metaguiding: bool = False) -> str:
+        # get the body. If there is no body, return the original html
+        match = self._body_regex.search(html)
+        if not match:
+            return html
+
+        body = match.group(1)
+        if not remove_metaguiding:
+            # find all text nodes in the body and trigger the bolding of the words
+            body = self._text_block_regex.sub(
+                lambda m: self._bold_text_node(m.group()),
+                body,
+            )
+        else:
+            body = self._bolded_text_block_regex.sub(lambda m: self._unbold_node_text_part(m.group()), body)
+
+        _logger.debug(f"Bolded body: {body}")
+
+        html = html.replace(match.group(1), body)
+        return html
+
+    def _get_encoding_using_lxml(self, xhtml_document: bytes) -> str | None:
+        from lxml import etree
+
+        parser = etree.XMLParser(resolve_entities=False)
+        doc = etree.fromstring(xhtml_document, parser=parser).getroottree()  # noqa: S320
+        docinfo = doc.docinfo
+        return docinfo.encoding
+
+    def _get_encoding_using_bom(self, xhtml_document: bytes) -> str | None:
+        if xhtml_document.startswith(b"\xef\xbb\xbf"):
+            return "utf-8"
+        elif xhtml_document.startswith(b"\xff\xfe"):
+            return "utf-16-le"
+        elif xhtml_document.startswith(b"\xfe\xff"):
+            return "utf-16-be"
+        elif xhtml_document.startswith(b"\x00\x00\xfe\xff"):
+            return "utf-32-be"
+        elif xhtml_document.startswith(b"\xff\xfe\x00\x00"):
+            return "utf-32-le"
+        else:
+            return None
+
+    def _get_encoding_using_xml_header(self, xhtml_document: bytes) -> str | None:
+        # if the document does not start with an XML header, return None. This is not a xml document
+        if not xhtml_document.startswith(b"<?xml "):
+            return None
+
+        xml_header_end = xhtml_document.find(b"?>") + 1
+        if xml_header_end == 0:
+            msg = "Invalid XHTML document. Could not find closing XML element."
+            raise ValueError(msg)
+
+        header = xhtml_document[:xml_header_end].decode("utf-8")
+        match = re.search(r'encoding=(["\'])([a-zA-Z][a-zA-Z0-9-]{0,38}[a-zA-Z0-9])\1', header)
+        if match:
+            return match.group(2)
+        else:
+            # although the XML header is present, it does not contain an encoding
+            # this is not a valid XHTML document, but we can still try to detect the encoding on a later stage
+            # and we will not raise an exception
+            return None
+
+    def _get_encoding(self, xhtml_document: bytes) -> str:
+        encoding = self._get_encoding_using_xml_header(xhtml_document)
+
+        if not encoding:
+            _logger.debug(
+                "Could not detect the encoding of the XHTML document using the XML header. "
+                "Trying to detect the encoding using the BOM."
+            )
+            encoding = self._get_encoding_using_bom(xhtml_document)
+
+        if not encoding:
+            _logger.debug(
+                "Could not detect the encoding of the XHTML document. Trying to detect the encoding using lxml."
+            )
+            encoding = self._get_encoding_using_lxml(xhtml_document)
+
+        return encoding or self._fallback_encoding
+
+    def metaguide_xhtml_document(self, xhtml_document: bytes, *, remove_metaguiding: bool = False) -> bytes:
+        # if none of the methods to detect the encoding work, use utf-8
+        encoding = self._get_encoding(xhtml_document) or "utf-8"
+
+        html = xhtml_document.decode(encoding)
+        bolded_html = self._bold_document(html, remove_metaguiding=remove_metaguiding)
+        return bolded_html.encode(encoding)
+
+
 class _EpubItemFile:
-    _logger = logging.getLogger(__name__)
 
     def __init__(self, filename: str | None = None, content: bytes = b"") -> None:
         self.filename = filename
@@ -30,14 +182,17 @@ class _EpubItemFile:
 
     def metaguide(self, metaguider: RegExBoldMetaguider, *, remove_metaguiding: bool = False):
         if not remove_metaguiding and self.metaguided:
-            self._logger.warning("File %s already metaguided, skipping", self.filename)
+            _logger.warning(f"File {self.filename} already metaguided, skipping")
         elif self.is_xhtml_document:
-            self._logger.debug("Metaguide (begin): %s", self.filename)
+            _logger.debug(f"Metaguiding file {self.filename}")
             self.content = metaguider.metaguide_xhtml_document(self.content, remove_metaguiding=remove_metaguiding)
             self.metaguided = True
-            self._logger.debug("Metaguide (end): %s", self.filename)
+            _logger.debug(f"Metaguided file {self.filename}")
         else:
-            self._logger.debug("Skipping file %s", self.filename)
+            _logger.debug(f"Skipping file {self.filename}")
+
+
+_metaguider = RegExBoldMetaguider()
 
 
 def _get_epub_item_files_from_zip(input_zip: zipfile.ZipFile) -> list:
@@ -64,11 +219,7 @@ def _write_item_files_to_zip(epub_item_files, output_zip):
             msg = "EpubItemFile.filename is None"
             raise ValueError(msg)
 
-        _logger.debug(
-            "Writing file %s to output zip %s",
-            epub_item_file.filename,
-            output_zip.filename,
-        )
+        _logger.debug(f"Writing file {epub_item_file.filename} to output zip {output_zip.filename}")
         with output_zip.open(epub_item_file.filename, mode="w") as compressed_output_file:
             compressed_output_file.write(epub_item_file.content)
 
@@ -76,8 +227,44 @@ def _write_item_files_to_zip(epub_item_files, output_zip):
         write_compressed_file(output_zip, _epub_item_file)
 
 
-def metaguide_epub(input_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
+def _ensure_file_exists(input_file: str):
+    if not os.path.isfile(input_file):
+        exception_message = f"Input file '{input_file}' does not exist"
+        _logger.error(exception_message)
+        raise ValueError(exception_message)
+
+
+def _ensure_allowed_extension(input_file: str, extensions: list[str]):
+    file_extension = os.path.splitext(input_file)[-1].upper()
+    if file_extension not in extensions:
+        exception_message = f"Input file '{input_file}' extension is not in {extensions}"
+        _logger.error(exception_message)
+        raise ValueError(exception_message)
+
+
+def metaguide_epub_file(input_file: str, output_file: str, *, remove_metaguiding: bool = False):
     """Metaguide an epub file
+    input_file: str
+        The input epub file
+    output_file: str
+        The output epub file
+    remove_metaguiding: bool
+        If True, removes metaguiding from the epub file
+    """
+
+    _logger.debug(f"Processing file '{input_file}' to output '{output_file}'")
+    _ensure_file_exists(input_file)
+    _ensure_allowed_extension(input_file, _EPUB_EXTENSIONS)
+
+    with open(input_file, "rb") as input_reader:
+        input_file_stream = BytesIO(input_reader.read())
+        output_file_stream = metaguide_epub_stream(input_file_stream, remove_metaguiding=remove_metaguiding)
+        with open(output_file, "wb") as output_writer:
+            output_writer.write(output_file_stream.read())
+
+
+def metaguide_epub_stream(input_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
+    """Metaguide an epub input stream
     input_file_stream: BytesIO
         The input epub file stream
     remove_metaguiding: bool
@@ -125,8 +312,29 @@ def metaguide_epub(input_stream: BytesIO, *, remove_metaguiding: bool = False) -
     return output_stream
 
 
-def metaguide_xhtml(input_file_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
+def metaguide_xhtml_file(input_file: str, output_file: str, *, remove_metaguiding: bool = False):
     """Metaguide an xhtml file
+    input_file: str
+        The input xhtml file
+    output_file: str
+        The output xhtml file
+    remove_metaguiding: bool
+        If True, removes metaguiding from the xhtml file
+    """
+    _logger.debug(f"Processing file '{input_file}' to output '{output_file}'")
+    _ensure_file_exists(input_file)
+    _ensure_allowed_extension(input_file, _XHTML_EXTENSIONS)
+
+    with open(input_file, "rb") as input_reader:
+        input_file_stream = BytesIO(input_reader.read())
+        output_file_stream = metaguide_xhtml_stream(input_file_stream, remove_metaguiding=remove_metaguiding)
+    output_file_stream.seek(0)
+    with open(output_file, "wb") as output_writer:
+        output_writer.write(output_file_stream.read())
+
+
+def metaguide_xhtml_stream(input_file_stream: BytesIO, *, remove_metaguiding: bool = False) -> BytesIO:
+    """Metaguide an xhtml input stream
     input_file_stream: BytesIO
         The input xhtml file stream
     remove_metaguiding: bool
@@ -164,11 +372,7 @@ def metaguide_dir(input_dir: str, output_dir: str, *, remove_metaguiding: bool =
             elif os.path.isdir(input_filename) and recursive:
                 yield from get_files(input_filename, recursive)
 
-    _logger.info(
-        "Processing files in %s to %s (recursively)",
-        input_dir,
-        output_dir,
-    )
+    _logger.info(f"Processing files in {input_dir} to {output_dir} (recursively)")
 
     files_processed = 0
     files_skipped = 0
@@ -176,17 +380,16 @@ def metaguide_dir(input_dir: str, output_dir: str, *, remove_metaguiding: bool =
 
     # check if the output directory exists and if not create it
     if not os.path.exists(output_dir):
-        _logger.info("Creating %s", output_dir)
+        _logger.info(f"Creating {output_dir}")
         os.makedirs(output_dir)
 
     for input_filename in get_files(input_dir, True):
         output_filename = os.path.join(output_dir, os.path.basename(input_filename))
-
-        _logger.debug("Processing %s to %s", input_filename, output_filename)
+        _logger.debug(f"Processing {input_filename} to {output_filename}")
 
         # verify if the output file already exists
         if os.path.isfile(output_filename):
-            _logger.warning("Skipping %s because %s already exists", input_filename, output_filename)
+            _logger.warning(f"Skipping {input_filename} because {output_filename} already exists")
             files_skipped += 1
             continue
 
@@ -194,9 +397,11 @@ def metaguide_dir(input_dir: str, output_dir: str, *, remove_metaguiding: bool =
             with open(input_filename, "rb") as input_reader:
                 input_file_stream = BytesIO(input_reader.read())
                 if os.path.splitext(input_filename)[-1].upper() in _EPUB_EXTENSIONS:
-                    output_file_stream = metaguide_epub(input_file_stream, remove_metaguiding=remove_metaguiding)
+                    output_file_stream = metaguide_epub_stream(input_file_stream, remove_metaguiding=remove_metaguiding)
                 else:
-                    output_file_stream = metaguide_xhtml(input_file_stream, remove_metaguiding=remove_metaguiding)
+                    output_file_stream = metaguide_xhtml_stream(
+                        input_file_stream, remove_metaguiding=remove_metaguiding
+                    )
                 with open(output_filename, "wb") as output_writer:
                     output_writer.write(output_file_stream.read())
             files_processed += 1
