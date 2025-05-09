@@ -20,10 +20,10 @@ Example of a text converted to a metaguided text:
 This repo is part of the [Intellireading](https://intellireading.com/) project, which aims to help people with dyslexia, ADHD, or anyone who wants to improve their reading focus and speed. 
 
 ## [Other Intellireading Code Repositories](https://github.com/stars/0x6f677548/lists/intellireading)
-- [Intellireading website](https://www.github.com/0x6f677548/intellireading-www), which allows anyone to convert an Epub to the metaguided version.
-- [API Server](https://www.github.com/0x6f677548/intellireading-api_server), that support the Intellireading website.
-- [CLI Tool](https://www.github.com/0x6f677548/intellireading-cli). A standalone tool and library that can be used to metaguide epub files.
-- [Calibre Plugins](https://www.github.com/0x6f677548/intellireading-calibre-plugins). A set of plugins that can be used to metaguide epub files using Calibre.
+- [Intellireading website](https://go.hugobatista.com/gh/intellireading-www), which allows anyone to convert an Epub to the metaguided version.
+- [API Server](https://go.hugobatista.com/gh/intellireading-api_server), that support the Intellireading website.
+- [CLI Tool](https://go.hugobatista.com/gh/intellireading-cli). A standalone tool and library that can be used to metaguide epub files.
+- [Calibre Plugins](https://go.hugobatista.com/gh/intellireading-calibre-plugins). A set of plugins that can be used to metaguide epub files using Calibre.
 
 
 ## What is Epub Metaguiding?
