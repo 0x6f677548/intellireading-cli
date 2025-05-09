@@ -1,7 +1,7 @@
 FROM python:3-slim
 
 # Links Docker image with repository
-LABEL org.opencontainers.image.source=https://github.com/0x6f677548/intellireading-cli
+LABEL org.opencontainers.image.source=https://go.hugobatista.com/gh/intellireading-cli
 
 
 ENV PYTHONDONTWRITEBYTECODE=1

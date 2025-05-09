@@ -3,9 +3,9 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/intellireading-cli.svg)](https://pypi.org/project/intellireading-cli)
-[![Deploy to ghcr.io](https://github.com/0x6f677548/intellireading-cli/actions/workflows/build-and-publish-to-ghcr.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/build-and-publish-to-ghcr.yml)
-[![Lint](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/lint.yml)
-[![Test](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://github.com/0x6f677548/intellireading-cli/actions/workflows/test.yml)
+[![Deploy to ghcr.io](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/build-and-publish-to-ghcr.yml/badge.svg)](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/build-and-publish-to-ghcr.yml)
+[![Lint](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/lint.yml/badge.svg)](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/lint.yml)
+[![Test](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/test.yml/badge.svg)](https://go.hugobatista.com/gh/intellireading-cli/actions/workflows/test.yml)
 
 
 Intellireading is a CLI tool with commands to accelerate your reading experience. It can also be used as a python library.
@@ -54,7 +54,7 @@ To install it, you can use pip:
 ### From source code
 You can also install it from the source code:
 ```console
-> git clone https://github.com/0x6f677548/intellireading-cli.git
+> git clone https://go.hugobatista.com/gh/intellireading-cli.git
 > cd intellireading-cli
 > pip install .
 > intellireading --help
