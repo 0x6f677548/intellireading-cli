@@ -47,7 +47,7 @@ Issues = "https://go.hugobatista.com/gh/intellireading-cli/issues"
 Source = "https://go.hugobatista.com/gh/intellireading-cli"
 
 [tool.hatch.version]
-path = "src/intellireading/client/__about__.py"
+path = "src/intellireading/client/__about_cli__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/intellireading"]
@@ -169,7 +169,7 @@ source_pkgs = ["intellireading", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/intellireading/__about__.py",
+  "src/intellireading/__about_cli__.py",
 ]
 
 [tool.coverage.paths]
