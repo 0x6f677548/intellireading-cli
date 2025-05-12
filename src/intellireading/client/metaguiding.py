@@ -1,16 +1,62 @@
 import logging
 from io import BytesIO
 import os
+import sys
+import traceback
 import zipfile
 from typing import Generator
 import math
 import regex as re
+# relative import is used to ensure that when this module gets copied to another location
+# it still works
+from .__about_cli__ import __version__ as cli_version # noqa: TID252
 
 
 _logger = logging.getLogger(__name__)
 _METAGUIDED_FLAG_FILENAME = "intellireading.metaguide"
 _EPUB_EXTENSIONS = [".EPUB", ".KEPUB"]
 _XHTML_EXTENSIONS = [".XHTML", ".HTML", ".HTM"]
+
+
+def _generate_flag_file_content() -> bytes:
+    """Generate the content for the metaguiding flag file.
+    This includes version, process name, and call graph information.
+
+    Returns:
+        bytes: The encoded content of the flag file.
+    """
+    try:
+        # Get process name - fallback to 'unknown' if sys.argv is not available
+        try:
+            process_name = os.path.basename(sys.argv[0])
+        except (AttributeError, IndexError):
+            process_name = "unknown"
+            _logger.warning("Could not determine process name, using 'unknown'")
+
+        # Get call stack information - handle potential traceback errors
+        try:
+            call_frames = traceback.extract_stack()
+            # Skip the last frame (current function) and metaguide_epub_stream frame
+            relevant_frames = call_frames[:-2]
+            call_graph_path = " -> ".join(
+                f"{os.path.basename(frame.filename)}:{frame.name}"
+                for frame in relevant_frames
+            )
+        except Exception as e:
+            call_graph_path = "unknown"
+            _logger.warning(f"Could not generate call graph: {e}")
+
+        # Build and return the flag content
+        flag_lines = [
+            f"version: {cli_version}",
+            f"process: {process_name}",
+            f"call_graph: {call_graph_path}"
+        ]
+        return "\n".join(flag_lines).encode()
+    except Exception as e:
+        # If anything goes wrong, return a minimal flag file rather than failing
+        _logger.error(f"Error generating flag file content: {e}")
+        return f"version: {cli_version}\nprocess: unknown\ncall_graph: error".encode()
 
 
 class RegExBoldMetaguider:
@@ -303,7 +349,8 @@ def metaguide_epub_stream(input_stream: BytesIO, *, remove_metaguiding: bool = F
                     processed_item_files = list(filtered_files)
                 else:
                     _logger.debug("Processing zip: Adding metaguided flag file")
-                    processed_item_files.append(_EpubItemFile(_METAGUIDED_FLAG_FILENAME))
+                    flag_content = _generate_flag_file_content()
+                    processed_item_files.append(_EpubItemFile(_METAGUIDED_FLAG_FILENAME, flag_content))
 
                 _logger.debug("Processing zip: Writing output zip")
                 _write_item_files_to_zip(processed_item_files, output_zip)
