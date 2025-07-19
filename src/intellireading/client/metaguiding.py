@@ -242,7 +242,7 @@ def _get_epub_item_files_from_zip(input_zip: zipfile.ZipFile) -> list:
         return _EpubItemFile(filename, input_zip.read(filename))
 
     epub_item_files = [read_compressed_file(input_zip, f.filename) for f in input_zip.infolist()]
-    _logger.debug("Read %d files from input file", len(epub_item_files))
+    _logger.debug(f"Read {len(epub_item_files)} files from input file")
     return epub_item_files
 
 
