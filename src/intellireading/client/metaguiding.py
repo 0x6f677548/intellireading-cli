@@ -143,7 +143,7 @@ class RegExBoldMetaguider:
         from lxml import etree
 
         parser = etree.XMLParser(resolve_entities=False)
-        doc = etree.fromstring(xhtml_document, parser=parser).getroottree()  # noqa: S320
+        doc = etree.fromstring(xhtml_document, parser=parser).getroottree()
         docinfo = doc.docinfo
         return docinfo.encoding
 
