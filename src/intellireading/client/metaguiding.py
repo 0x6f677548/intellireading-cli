@@ -225,6 +225,8 @@ class _EpubItemFile:
     def metaguide(self, metaguider: RegExBoldMetaguider, *, remove_metaguiding: bool = False):
         if not remove_metaguiding and self.metaguided:
             _logger.warning(f"File {self.filename} already metaguided, skipping")
+        elif self.filename == "nav.xhtml":
+            _logger.debug(f"Skipping nav file {self.filename}")
         elif self.is_xhtml_document:
             _logger.debug(f"Metaguiding file {self.filename}")
             self.content = metaguider.metaguide_xhtml_document(self.content, remove_metaguiding=remove_metaguiding)
