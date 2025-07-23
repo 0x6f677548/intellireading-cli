@@ -218,7 +218,6 @@ class _EpubItemFile:
 
         # some epub have files with html extension but they are xml files
         self.is_xhtml_document = _extension in _XHTML_EXTENSIONS
-        
         # check whether the file is a table of contents or navigation file
         # by checking the filename against a list of known TOC filenames
         # this is a heuristic and may not be 100% accurate. 
